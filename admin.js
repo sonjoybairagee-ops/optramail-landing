@@ -1,4 +1,4 @@
-const SERVER = "https://optramail-backend.vercel.app"; // Same origin — Vercel API routes
+const SERVER = ""; // Same origin — Vercel API routes
 const ADMIN_EMAIL = "sonjoy.bairagee@gmail.com";
 let adminSecret = "";
 let allUsers = [];

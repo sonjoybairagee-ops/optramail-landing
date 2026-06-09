@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const API = "https://optramail-backend.vercel.app";
+  const API = "https://optramail.vercel.app";
 
   // ── GET EMAIL ── URL param বা localStorage থেকে
   const params = new URLSearchParams(window.location.search);

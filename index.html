@@ -445,6 +445,26 @@
       transition: opacity .6s ease, transform .6s ease;
     }
     .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
   </style>
 </head>
 <body>
