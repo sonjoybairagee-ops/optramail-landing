@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OptraMail — Email Tracking for Cold Outreach</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07070d;
+      --surface: #0f0f1a;
+      --surface2: #161624;
+      --border: #1c1c2e;
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --accent3: #22d3ee;
+      --text: #eeeef8;
+      --muted: #6b6b8a;
+      --green: #22c55e;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BG ORBS ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(108,99,255,.12); top: -150px; right: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(255,101,132,.08); bottom: 100px; left: -150px; }
+    .orb-3 { width: 300px; height: 300px; background: rgba(34,211,238,.06); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      padding: 16px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      background: rgba(7,7,13,.8);
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+
+    .nav-logo span { font-size: 22px; }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--accent), #8b7cf8);
+      color: white !important;
+      padding: 9px 22px !important;
+      border-radius: 10px !important;
+      font-weight: 600 !important;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 100px 24px 80px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(108,99,255,.12);
+      border: 1px solid rgba(108,99,255,.25);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 12px;
+      color: #a89dff;
+      font-weight: 500;
+      margin-bottom: 32px;
+      letter-spacing: .5px;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(38px, 6vw, 64px);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 .grad {
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--accent), #8b7cf8);
+      color: white;
+      padding: 14px 30px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 0 30px rgba(108,99,255,.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(108,99,255,.5); }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent;
+      color: var(--text);
+      padding: 14px 30px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1.5px solid var(--border);
+      transition: border-color .2s, background .2s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); background: rgba(108,99,255,.06); }
+
+    /* ── STATS ── */
+    .stats {
+      position: relative; z-index: 1;
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      padding: 0 24px 80px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* ── FEATURES ── */
+    .section {
+      position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      transition: border-color .25s, transform .25s;
+    }
+    .feature-card:hover { border-color: rgba(108,99,255,.4); transform: translateY(-3px); }
+
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── PRICING ── */
+    #pricing {
+      position: relative; z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 80px 24px 100px;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 600px) { .pricing-grid { grid-template-columns: 1fr; } }
+
+    .pricing-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 22px;
+      padding: 36px 32px;
+      position: relative;
+      transition: transform .25s;
+    }
+    .pricing-card:hover { transform: translateY(-4px); }
+
+    .pricing-card.popular {
+      border-color: var(--accent);
+      background: linear-gradient(160deg, rgba(108,99,255,.08), var(--surface));
+      box-shadow: 0 0 60px rgba(108,99,255,.15);
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -13px; left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, var(--accent), #8b7cf8);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 16px;
+      border-radius: 20px;
+      letter-spacing: .5px;
+      white-space: nowrap;
+    }
+
+    .plan-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .plan-desc { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+    .plan-price {
+      margin-bottom: 28px;
+    }
+
+    .price-amount {
+      font-family: 'Syne', sans-serif;
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .price-currency { font-size: 22px; vertical-align: super; font-weight: 600; }
+    .price-period { font-size: 14px; color: var(--muted); }
+
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+
+    .check { color: var(--green); font-size: 16px; flex-shrink: 0; }
+    .cross { color: var(--muted); font-size: 16px; flex-shrink: 0; }
+
+    .plan-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .plan-btn.free {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .plan-btn.free:hover { border-color: var(--accent); background: rgba(108,99,255,.08); }
+
+    .plan-btn.pro {
+      background: linear-gradient(135deg, var(--accent), #8b7cf8);
+      color: white;
+      box-shadow: 0 0 30px rgba(108,99,255,.3);
+    }
+    .plan-btn.pro:hover { transform: translateY(-1px); box-shadow: 0 0 50px rgba(108,99,255,.5); }
+
+    /* ── BILLING TOGGLE ── */
+    .billing-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-track {
+      width: 48px; height: 26px;
+      background: var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      position: relative;
+      transition: background .3s;
+      border: 1.5px solid var(--border);
+    }
+
+    .toggle-track.active { background: var(--accent); }
+
+    .toggle-thumb {
+      width: 20px; height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 1px; left: 2px;
+      transition: transform .3s;
+    }
+
+    .toggle-track.active .toggle-thumb { transform: translateX(22px); }
+
+    .discount-badge {
+      background: rgba(34,197,94,.15);
+      color: var(--green);
+      border: 1px solid rgba(34,197,94,.3);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .yearly-note { margin-top: 6px; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 32px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    footer p { font-size: 13px; color: var(--muted); }
+
+    /* ── ANIMATIONS ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo"><img src="../icons/icon48.png" style="width:28px; height:28px; vertical-align:middle; border-radius:6px; object-fit:cover;" /> OptraMail</a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#" onclick="document.getElementById('signin-modal').style.display='flex'; return false;">Sign In</a></li>
+      <li><a href="#pricing" class="nav-cta">Get Started Free</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero fade-in">
+    <div class="hero-badge">✨ Now available for Chrome</div>
+    <h1>Know exactly when your<br/><span class="grad">cold emails get opened</span></h1>
+    <p>OptraMail tracks your Gmail outreach in real-time.<br/>See open count, time, and follow up at the perfect moment.</p>
+    <div class="hero-btns">
+      <a href="#pricing" class="btn-primary">🚀 Start for Free</a>
+      <a href="#features" class="btn-ghost">See Features →</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats fade-in">
+    <div class="stat">
+      <div class="stat-num">2x</div>
+      <div class="stat-label">Better reply rates</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">Real-time</div>
+      <div class="stat-label">Open notifications</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Gmail native</div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="section-label">What you get</div>
+    <h2 class="section-title fade-in">Everything you need to<br/>close more deals</h2>
+    <div class="features-grid">
+      <div class="feature-card fade-in">
+        <span class="feature-icon">👁️</span>
+        <h3>Real-time Open Tracking</h3>
+        <p>Get instant desktop notifications the moment your email is opened — know who's reading right now.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <span class="feature-icon">📊</span>
+        <h3>Open Count & History</h3>
+        <p>See how many times each email was opened and exactly when — spot your most interested prospects.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <span class="feature-icon">🗺️</span>
+        <h3>Location Insights</h3>
+        <p>Discover where your emails are being read — country and city level data for deeper context.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <span class="feature-icon">⚡</span>
+        <h3>Zero Workflow Change</h3>
+        <p>Works directly inside Gmail. Write and send as normal — tracking happens automatically in the background.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <span class="feature-icon">🔒</span>
+        <h3>Private & Secure</h3>
+        <p>Your email data stays yours. We never store email content — only tracking metadata you care about.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <span class="feature-icon">🔔</span>
+        <h3>Smart Notifications</h3>
+        <p>Desktop alerts that only fire when it matters — no noise, just signal when prospects re-engage.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="section-label">Simple pricing</div>
+    <h2 class="section-title fade-in">Start free, upgrade when<br/>you're ready</h2>
+
+    <!-- BILLING TOGGLE -->
+    <div class="billing-toggle fade-in">
+      <span class="toggle-label" id="label-monthly">Monthly</span>
+      <div class="toggle-track" id="billing-toggle" onclick="toggleBilling()">
+        <div class="toggle-thumb" id="toggle-thumb"></div>
+      </div>
+      <span class="toggle-label" id="label-yearly">
+        Yearly
+        <span class="discount-badge">Save 10%</span>
+      </span>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- FREE -->
+      <div class="pricing-card fade-in">
+        <div class="plan-name">Free</div>
+        <div class="plan-desc">Perfect for getting started</div>
+        <div class="plan-price">
+          <span class="price-amount"><span class="price-currency">$</span>0</span><br/>
+          <span class="price-period">forever free</span>
+        </div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Track up to 20 emails/month</li>
+          <li><span class="check">✓</span> Real-time open notifications</li>
+          <li><span class="check">✓</span> Open count & timestamps</li>
+          <li><span class="check">✓</span> 7-day history</li>
+          <li><span class="cross">✗</span> Location tracking</li>
+          <li><span class="cross">✗</span> Unlimited email tracking</li>
+          <li><span class="cross">✗</span> Priority support</li>
+        </ul>
+        <button class="plan-btn free" onclick="handleFreePlan()">Get Started Free</button>
+      </div>
+
+      <!-- PRO -->
+      <div class="pricing-card popular fade-in">
+        <div class="popular-badge">⚡ MOST POPULAR</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-desc">For serious cold outreach</div>
+        <div class="plan-price">
+          <span class="price-amount"><span class="price-currency">$</span><span id="pro-price">5</span></span><br/>
+          <span class="price-period" id="pro-period">per month</span>
+          <div class="yearly-note" id="yearly-note" style="display:none;">
+            <span style="color:var(--green);font-size:12px;">$54/year — you save $6!</span>
+          </div>
+        </div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Unlimited email tracking</li>
+          <li><span class="check">✓</span> Real-time open notifications</li>
+          <li><span class="check">✓</span> Open count & timestamps</li>
+          <li><span class="check">✓</span> 90-day history</li>
+          <li><span class="check">✓</span> Location tracking</li>
+          <li><span class="check">✓</span> Advanced analytics</li>
+          <li><span class="check">✓</span> Priority support</li>
+        </ul>
+        <button class="plan-btn pro" id="pro-btn" onclick="handleProPlan()">Upgrade to Pro →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIGN IN MODAL -->
+  <div id="signin-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <h2 style="margin-bottom: 10px;">Sign in to OptraMail</h2>
+      <p style="color: var(--muted); margin-bottom: 24px;">Use your Google account to access your dashboard.</p>
+      
+      <div id="g_id_onload"
+           data-client_id="936838452837-9rcu3mte6qn3o8ku0cjbf8nmvvavkhhn.apps.googleusercontent.com"
+           data-context="signin"
+           data-ux_mode="popup"
+           data-callback="handleGoogleSignIn"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-shape="rectangular"
+           data-theme="outline"
+           data-text="signin_with"
+           data-size="large"
+           data-logo_alignment="left"
+           style="display:flex; justify-content:center; margin-bottom: 20px;">
+      </div>
+
+      <button onclick="document.getElementById('signin-modal').style.display='none'" style="background: transparent; border: none; color: var(--muted); cursor: pointer; font-family: 'DM Sans'; font-size: 14px;">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    }
+
+    function handleGoogleSignIn(response) {
+      try {
+        const data = parseJwt(response.credential);
+        if (data && data.email) {
+          localStorage.setItem('optramail_email', data.email);
+          window.location.href = 'dashboard.html';
+        }
+      } catch (err) {
+        alert("Failed to sign in. Please try again.");
+      }
+    }
+  </script>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo"><img src="../icons/icon48.png" style="width:24px; height:24px; vertical-align:middle; border-radius:6px; object-fit:cover; margin-right:8px;" />OptraMail</div>
+    <p>Built for cold email outreach professionals</p>
+    <p style="color: var(--muted)">© 2025 OptraMail. All rights reserved.</p>
+  </footer>
+
+  <script src="landing.js"></script>
+</body>
+</html>

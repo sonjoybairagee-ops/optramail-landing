@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OptraMail Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0c10;
+      --surface: #13141a;
+      --surface2: #1a1b23;
+      --border: #22232e;
+      --accent: #00e5a0;
+      --accent-dim: rgba(0,229,160,.12);
+      --red: #ff4d6d;
+      --red-dim: rgba(255,77,109,.1);
+      --yellow: #fbbf24;
+      --blue: #60a5fa;
+      --text: #e8e9f0;
+      --muted: #5a5b70;
+      --mono: 'DM Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── LOGIN SCREEN ── */
+    #login-screen {
+      width: 100vw; height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 24px;
+    }
+
+    .login-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 360px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+
+    .login-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px; font-weight: 800;
+      color: var(--accent);
+    }
+
+    .login-sub { font-size: 13px; color: var(--muted); }
+
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    .input-group label { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+    .input-group input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .input-group input:focus { border-color: var(--accent); }
+
+    .login-btn {
+      background: var(--accent);
+      color: #0b0c10;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: opacity .2s;
+    }
+    .login-btn:hover { opacity: .85; }
+
+    .login-error {
+      font-size: 12px; color: var(--red);
+      text-align: center; display: none;
+    }
+
+    /* ── SIDEBAR ── */
+    #app { display: none; width: 100%; }
+
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      height: 100vh; position: sticky; top: 0;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      font-family: 'Syne', sans-serif;
+      font-size: 16px; font-weight: 800;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .admin-badge {
+      font-size: 9px; font-weight: 700;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(0,229,160,.2);
+      padding: 2px 7px; border-radius: 20px;
+      letter-spacing: .5px;
+    }
+
+    .nav { padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .18s;
+      border: 1px solid transparent;
+    }
+    .nav-item:hover { color: var(--text); background: var(--surface2); }
+    .nav-item.active { color: var(--accent); background: var(--accent-dim); border-color: rgba(0,229,160,.15); }
+    .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--muted);
+    }
+
+    /* ── MAIN ── */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
+
+    .topbar {
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface);
+      position: sticky; top: 0; z-index: 10;
+    }
+
+    .topbar-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+    .server-status {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--muted);
+    }
+
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.red { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .content { padding: 32px; display: flex; flex-direction: column; gap: 28px; }
+
+    /* ── STATS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+      transition: border-color .2s;
+    }
+    .stat-card:hover { border-color: rgba(0,229,160,.2); }
+
+    .stat-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+    .stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--text); }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .stat-value.green { color: var(--accent); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.yellow { color: var(--yellow); }
+
+    /* ── SECTION ── */
+    .section { display: flex; flex-direction: column; gap: 16px; }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--surface2); }
+    th {
+      padding: 12px 20px;
+      text-align: left;
+      font-size: 11px; font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase; letter-spacing: .8px;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 14px 20px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(34,35,46,.6);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.015); }
+
+    .mono { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+    }
+    .badge.pro { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(0,229,160,.2); }
+    .badge.free { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .badge.active { background: rgba(96,165,250,.1); color: var(--blue); border: 1px solid rgba(96,165,250,.2); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      padding: 7px 14px; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; border: none;
+      font-family: 'DM Sans', sans-serif;
+      transition: all .18s;
+    }
+    .btn-green { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(0,229,160,.2); }
+    .btn-green:hover { background: var(--accent); color: #0b0c10; }
+    .btn-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,77,109,.2); }
+    .btn-red:hover { background: var(--red); color: white; }
+    .btn-primary { background: var(--accent); color: #0b0c10; }
+    .btn-primary:hover { opacity: .85; }
+    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── GRANT PRO FORM ── */
+    .grant-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+    }
+
+    .grant-form .input-group { flex: 1; min-width: 200px; }
+
+    .grant-form input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      outline: none;
+      width: 100%;
+      transition: border-color .2s;
+    }
+    .grant-form input:focus { border-color: var(--accent); }
+
+    /* ── SEARCH ── */
+    .search-bar {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      outline: none;
+      width: 240px;
+      transition: border-color .2s;
+    }
+    .search-bar:focus { border-color: var(--accent); }
+
+    /* ── EMPTY ── */
+    .empty {
+      text-align: center; padding: 60px 20px;
+      color: var(--muted); font-size: 14px;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-size: 13px; font-weight: 500;
+      display: none;
+      z-index: 999;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      animation: slideUp .3s ease;
+    }
+    .toast.show { display: block; }
+    .toast.success { border-color: rgba(0,229,160,.3); color: var(--accent); }
+    .toast.error { border-color: rgba(255,77,109,.3); color: var(--red); }
+    @keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+    /* ── PAGE VISIBILITY ── */
+    .page { display: none; }
+    .page.active { display: flex; flex-direction: column; gap: 28px; }
+
+    /* ── LOADING ── */
+    .spinner-sm {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div>
+      <div class="login-title"><img src="../icons/icon48.png" style="width:28px; height:28px; vertical-align:middle; border-radius:6px; object-fit:cover; margin-right:8px;" />OptraMail</div>
+      <div class="login-sub" style="margin-top:4px;">Admin Panel — Restricted Access</div>
+    </div>
+    <div class="input-group">
+      <label>Admin Secret Key</label>
+      <input type="password" id="secret-input" placeholder="Enter secret key..." onkeydown="if(event.key==='Enter')login()"/>
+    </div>
+    <button class="login-btn" onclick="login()">Access Admin Panel</button>
+    <div class="login-error" id="login-error">❌ Wrong secret key. Try again.</div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app" style="display:none;width:100%;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      📬 OptraMail
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="showPage('overview')">
+        <span class="nav-icon">📊</span> Overview
+      </div>
+      <div class="nav-item" onclick="showPage('users')">
+        <span class="nav-icon">👥</span> Users
+      </div>
+      <div class="nav-item" onclick="showPage('emails')">
+        <span class="nav-icon">📧</span> Tracked Emails
+      </div>
+      <div class="nav-item" onclick="showPage('grant')">
+        <span class="nav-icon">⚡</span> Grant Pro
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      OptraMail Admin v1.0<br/>
+      <span id="admin-server">checking...</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Overview</div>
+      <div class="topbar-right">
+        <div class="server-status">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-text">Connecting...</span>
+        </div>
+        <button class="btn btn-ghost" onclick="refreshAll()">↻ Refresh</button>
+        <button class="btn btn-red" onclick="logout()" style="padding:7px 12px;">Sign Out</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- OVERVIEW PAGE -->
+      <div id="page-overview" class="page active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value" id="stat-total">—</div>
+            <div class="stat-sub">Registered accounts</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pro Users</div>
+            <div class="stat-value green" id="stat-pro">—</div>
+            <div class="stat-sub">Active subscribers</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Free Users</div>
+            <div class="stat-value yellow" id="stat-free">—</div>
+            <div class="stat-sub">On free plan</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Tracked Emails</div>
+            <div class="stat-value" id="stat-emails">—</div>
+            <div class="stat-sub">Total sent</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Opens</div>
+            <div class="stat-value green" id="stat-opens">—</div>
+            <div class="stat-sub">Real opens (no bots)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">MRR</div>
+            <div class="stat-value green" id="stat-mrr">—</div>
+            <div class="stat-sub">Monthly recurring</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">Recent Users</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Plan</th>
+                  <th>Joined</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="recent-users-table">
+                <tr><td colspan="4" class="empty">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS PAGE -->
+      <div id="page-users" class="page">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">All Users</div>
+            <input class="search-bar" placeholder="🔍 Search by email..." oninput="filterUsers(this.value)" id="user-search"/>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Plan</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-table">
+                <tr><td colspan="4" class="empty">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAILS PAGE -->
+      <div id="page-emails" class="page">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">All Tracked Emails</div>
+            <input class="search-bar" placeholder="🔍 Search by subject..." oninput="filterEmails(this.value)" id="email-search"/>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Sent By</th>
+                  <th>Sent At</th>
+                  <th>Opens</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="emails-table">
+                <tr><td colspan="5" class="empty">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRANT PRO PAGE -->
+      <div id="page-grant" class="page">
+        <div class="section">
+          <div class="section-title">Manually Grant Pro Access</div>
+          <div class="grant-form">
+            <div class="input-group">
+              <label>User Email</label>
+              <input type="email" id="grant-email" placeholder="user@gmail.com"/>
+            </div>
+            <button class="btn btn-primary" onclick="grantPro()" id="grant-btn">⚡ Grant Pro</button>
+            <button class="btn btn-red" onclick="revokePro()" id="revoke-btn">✕ Revoke Pro</button>
+          </div>
+          <div id="grant-result" style="font-size:13px;color:var(--muted);padding:0 4px;"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Pro Users List</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Activated</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="pro-users-table">
+                <tr><td colspan="3" class="empty">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const SERVER = "https://optramail.vercel.app";
+  let adminSecret = "";
+  let allUsers = [];
+  let allEmails = [];
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const email = localStorage.getItem('optramail_email');
+    if (email === 'sonjoy.bairagee@gmail.com') {
+      document.getElementById("secret-input").value = "OptraMail@Admin2026";
+      login();
+    }
+  });
+
+  // ── LOGIN ──
+  function login() {
+    const secret = document.getElementById("secret-input").value.trim();
+    if (!secret) return;
+
+    adminSecret = secret;
+    // Test the secret by calling a protected endpoint
+    fetch(`${SERVER}/api/admin/stats`, {
+      headers: { "x-admin-secret": secret }
+    })
+    .then(r => {
+      if (r.status === 403) throw new Error("wrong");
+      return r.json();
+    })
+    .then(() => {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("app").style.display = "flex";
+      loadAll();
+    })
+    .catch(() => {
+      document.getElementById("login-error").style.display = "block";
+      adminSecret = "";
+    });
+  }
+
+  function logout() {
+    adminSecret = "";
+    document.getElementById("login-screen").style.display = "flex";
+    document.getElementById("app").style.display = "none";
+    document.getElementById("secret-input").value = "";
+  }
+
+  // ── NAVIGATION ──
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(`page-${name}`).classList.add('active');
+    event.currentTarget.classList.add('active');
+    const titles = { overview: 'Overview', users: 'Users', emails: 'Tracked Emails', grant: 'Grant Pro' };
+    document.getElementById('page-title').textContent = titles[name];
+  }
+
+  // ── LOAD ALL DATA ──
+  async function loadAll() {
+    checkServerStatus();
+    await Promise.all([loadStats(), loadUsers(), loadEmails()]);
+  }
+
+  function refreshAll() { loadAll(); showToast("Refreshed!", "success"); }
+
+  // ── SERVER STATUS ──
+  async function checkServerStatus() {
+    try {
+      const r = await fetch(`${SERVER}/health`);
+      const dot = document.getElementById("status-dot");
+      const txt = document.getElementById("status-text");
+      if (r.ok) {
+        dot.classList.remove("red");
+        txt.textContent = "Server online";
+        document.getElementById("admin-server").textContent = SERVER.replace("https://","");
+      } else throw new Error();
+    } catch {
+      document.getElementById("status-dot").classList.add("red");
+      document.getElementById("status-text").textContent = "Server offline";
+    }
+  }
+
+  // ── STATS ──
+  async function loadStats() {
+    try {
+      const r = await fetch(`${SERVER}/api/admin/stats`, { headers: { "x-admin-secret": adminSecret } });
+      const data = await r.json();
+      document.getElementById("stat-total").textContent = data.totalUsers ?? "—";
+      document.getElementById("stat-pro").textContent = data.proUsers ?? "—";
+      document.getElementById("stat-free").textContent = data.freeUsers ?? "—";
+      document.getElementById("stat-emails").textContent = data.totalEmails ?? "—";
+      document.getElementById("stat-opens").textContent = data.totalOpens ?? "—";
+      document.getElementById("stat-mrr").textContent = data.proUsers ? `$${(data.proUsers * 5).toFixed(0)}` : "$0";
+    } catch {}
+  }
+
+  // ── USERS ──
+  async function loadUsers() {
+    try {
+      const r = await fetch(`${SERVER}/api/admin/users`, { headers: { "x-admin-secret": adminSecret } });
+      const data = await r.json();
+      allUsers = data.users || [];
+      renderUsers(allUsers);
+      renderRecentUsers(allUsers.slice(0, 5));
+      renderProUsers(allUsers.filter(u => u.isPro));
+    } catch {}
+  }
+
+  function renderUsers(users) {
+    const tbody = document.getElementById("users-table");
+    if (!users.length) { tbody.innerHTML = `<tr><td colspan="4" class="empty">No users yet</td></tr>`; return; }
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>${u.email}</td>
+        <td><span class="badge ${u.isPro ? 'pro' : 'free'}">${u.isPro ? '⚡ Pro' : 'Free'}</span></td>
+        <td class="mono">${formatDate(u.createdAt || u.updatedAt)}</td>
+        <td>
+          ${u.isPro
+            ? `<button class="btn btn-red" onclick="quickRevoke('${u.email}')">Revoke</button>`
+            : `<button class="btn btn-green" onclick="quickGrant('${u.email}')">Grant Pro</button>`
+          }
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderRecentUsers(users) {
+    const tbody = document.getElementById("recent-users-table");
+    if (!users.length) { tbody.innerHTML = `<tr><td colspan="4" class="empty">No users yet</td></tr>`; return; }
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>${u.email}</td>
+        <td><span class="badge ${u.isPro ? 'pro' : 'free'}">${u.isPro ? '⚡ Pro' : 'Free'}</span></td>
+        <td class="mono">${formatDate(u.createdAt || u.updatedAt)}</td>
+        <td>
+          ${u.isPro
+            ? `<button class="btn btn-red" onclick="quickRevoke('${u.email}')">Revoke</button>`
+            : `<button class="btn btn-green" onclick="quickGrant('${u.email}')">Grant Pro</button>`
+          }
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderProUsers(users) {
+    const tbody = document.getElementById("pro-users-table");
+    if (!users.length) { tbody.innerHTML = `<tr><td colspan="3" class="empty">No pro users yet</td></tr>`; return; }
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>${u.email}</td>
+        <td class="mono">${formatDate(u.updatedAt)}</td>
+        <td><button class="btn btn-red" onclick="quickRevoke('${u.email}')">Revoke Pro</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function filterUsers(q) {
+    const filtered = allUsers.filter(u => u.email.toLowerCase().includes(q.toLowerCase()));
+    renderUsers(filtered);
+  }
+
+  // ── EMAILS ──
+  async function loadEmails() {
+    try {
+      const r = await fetch(`${SERVER}/api/admin/emails`, { headers: { "x-admin-secret": adminSecret } });
+      const data = await r.json();
+      allEmails = data.emails || [];
+      renderEmails(allEmails);
+    } catch {}
+  }
+
+  function renderEmails(emails) {
+    const tbody = document.getElementById("emails-table");
+    if (!emails.length) { tbody.innerHTML = `<tr><td colspan="5" class="empty">No tracked emails yet</td></tr>`; return; }
+    tbody.innerHTML = emails.map(e => `
+      <tr>
+        <td>${e.subject || 'No Subject'}</td>
+        <td class="mono">${e.userEmail || '—'}</td>
+        <td class="mono">${formatDate(e.sentAt)}</td>
+        <td><span class="badge ${e.openCount > 0 ? 'active' : 'free'}">${e.openCount || 0} opens</span></td>
+        <td><span class="badge ${e.openCount > 0 ? 'pro' : 'free'}">${e.openCount > 0 ? 'Opened' : 'Pending'}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  function filterEmails(q) {
+    const filtered = allEmails.filter(e => (e.subject||'').toLowerCase().includes(q.toLowerCase()));
+    renderEmails(filtered);
+  }
+
+  // ── GRANT / REVOKE ──
+  async function grantPro() {
+    const email = document.getElementById("grant-email").value.trim();
+    if (!email) return;
+    await callGrantRevoke(email, true);
+    document.getElementById("grant-email").value = "";
+  }
+
+  async function revokePro() {
+    const email = document.getElementById("grant-email").value.trim();
+    if (!email) return;
+    await callGrantRevoke(email, false);
+    document.getElementById("grant-email").value = "";
+  }
+
+  async function quickGrant(email) { await callGrantRevoke(email, true); }
+  async function quickRevoke(email) { await callGrantRevoke(email, false); }
+
+  async function callGrantRevoke(email, grant) {
+    try {
+      const r = await fetch(`${SERVER}/api/admin/set-pro`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-secret": adminSecret },
+        body: JSON.stringify({ email, isPro: grant })
+      });
+      const data = await r.json();
+      if (data.ok) {
+        showToast(grant ? `✅ Pro granted to ${email}` : `✅ Pro revoked from ${email}`, "success");
+        await loadUsers();
+        await loadStats();
+      } else {
+        showToast("❌ Failed: " + (data.error || "Unknown error"), "error");
+      }
+    } catch {
+      showToast("❌ Server error", "error");
+    }
+  }
+
+  // ── HELPERS ──
+  function formatDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function showToast(msg, type = "success") {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove("show"), 3000);
+  }
+</script>
+</body>
+</html>

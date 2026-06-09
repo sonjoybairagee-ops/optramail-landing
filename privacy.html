@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Privacy Policy — OptraMail</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07070d;
+      --surface: #0f0f1a;
+      --border: #1c1c2e;
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --text: #eeeef8;
+      --muted: #6b6b8a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── BG ORBS ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(108,99,255,.12); top: -150px; right: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(255,101,132,.08); bottom: 100px; left: -150px; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      padding: 16px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      background: rgba(7,7,13,.8);
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+
+    /* ── CONTENT ── */
+    .container {
+      position: relative; z-index: 1;
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 36px;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    p {
+      color: var(--muted);
+      margin-bottom: 16px;
+      font-size: 15px;
+    }
+
+    ul {
+      margin-left: 20px;
+      margin-bottom: 16px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .last-updated {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      display: block;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 14px;
+      position: relative; z-index: 1;
+    }
+    
+    .footer a {
+      color: var(--text);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <img src="../icons/icon48.png" style="width:28px; height:28px; border-radius:6px; object-fit:cover;" /> OptraMail
+    </a>
+  </nav>
+
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <span class="last-updated">Last Updated: June 2026</span>
+
+    <p>Welcome to OptraMail. Your privacy is our top priority. We believe in being fully transparent about the data we collect, why we collect it, and how we protect it.</p>
+
+    <h2>1. What Data Do We Collect?</h2>
+    <p>OptraMail is designed exclusively to track email performance and manage your CRM. We do NOT read your personal emails or store your passwords. We only collect:</p>
+    <ul>
+      <li><strong>Email Tracking Data:</strong> Information regarding whether your sent emails were opened, when they were opened, and if links or PDFs within the email were clicked or downloaded.</li>
+      <li><strong>CRM Data:</strong> The names, emails, and company details of the leads you explicitly add to your OptraMail CRM.</li>
+      <li><strong>Basic Account Information:</strong> Your email address, used strictly to authenticate you via the extension and map your tracking data.</li>
+    </ul>
+
+    <h2>2. How Do We Use Your Data?</h2>
+    <p>The information we collect is used entirely to power the features of the OptraMail extension:</p>
+    <ul>
+      <li>To generate your "My Performance" dashboard and Engagement Scores.</li>
+      <li>To provide you with a real-time timeline of opens and clicks.</li>
+      <li>To allow you to manage your sales pipeline efficiently.</li>
+    </ul>
+
+    <h2>3. Data Protection and Storage</h2>
+    <p>All data is securely transmitted over HTTPS and stored securely. We do not sell, rent, or share your tracking data or CRM leads with any third parties.</p>
+
+    <h2>4. Extension Permissions</h2>
+    <p>The OptraMail Chrome Extension requires specific permissions to function:</p>
+    <ul>
+      <li><strong>Storage:</strong> Used to temporarily store your tracking mode preferences and authentication state.</li>
+      <li><strong>Host Permissions:</strong> Required to inject the tracking pixel and wrapper links into the emails you choose to send via Gmail.</li>
+    </ul>
+
+    <h2>5. Contact Us</h2>
+    <p>If you have any questions or concerns regarding this Privacy Policy or the security of your data, please contact us directly at support@optramail.com.</p>
+  </div>
+
+  <div class="footer">
+    &copy; 2026 OptraMail. <a href="index.html">Back to Home</a>
+  </div>
+
+</body>
+</html>

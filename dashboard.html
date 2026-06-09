@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OptraMail Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --sidebar-bg: #161e29;
+      --sidebar-hover: #1f2937;
+      --sidebar-text: #9ca3af;
+      --sidebar-active-text: #10b981;
+      --sidebar-active-bg: rgba(16, 185, 129, 0.1);
+      
+      --topbar-bg: #ffffff;
+      --bg: #f9fafb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      
+      --border: #e5e7eb;
+      --accent: #10b981;
+      --accent-hover: #059669;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 250px;
+      background-color: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 20px 24px;
+      font-weight: 700;
+      font-size: 18px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 12px;
+    }
+
+    .sidebar-section {
+      padding: 12px 0;
+    }
+
+    .sidebar-label {
+      padding: 0 24px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      color: #6b7280;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      text-decoration: none;
+      color: var(--sidebar-text);
+    }
+
+    .nav-item:hover {
+      background-color: var(--sidebar-hover);
+      color: #ffffff;
+    }
+
+    .nav-item.active {
+      background-color: var(--sidebar-active-bg);
+      color: var(--sidebar-active-text);
+      border-left: 3px solid var(--sidebar-active-text);
+      padding-left: 21px; /* adjust for border */
+    }
+
+    .nav-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      height: 64px;
+      background-color: var(--topbar-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 14px;
+      width: 300px;
+    }
+
+    .search-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      width: 100%;
+      margin-left: 8px;
+      font-family: inherit;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btn-upgrade {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-upgrade:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .top-link {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+    .top-link:hover { text-decoration: underline; }
+
+    .topbar-icons {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .user-profile {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .badge-free {
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #374151;
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      border: 2px solid white;
+    }
+
+    /* ── CONTENT AREA ── */
+    .content-area {
+      flex: 1;
+      padding: 32px 48px;
+      overflow-y: auto;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .tab {
+      padding: 0 4px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .tab:hover {
+      color: var(--text-main);
+    }
+
+    .tab.active {
+      color: var(--accent);
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--accent);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* ── DATA VIEW ── */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-main);
+      font-size: 18px;
+      font-weight: 600;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .data-list {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .data-item {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 16px 20px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .data-item:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transform: translateY(-1px);
+    }
+
+    .item-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .item-subject {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-main);
+    }
+
+    .item-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .item-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .item-opens {
+      background: var(--sidebar-active-bg);
+      color: var(--sidebar-active-text);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="../icons/icon48.png" style="width:24px; height:24px; vertical-align:middle; border-radius:4px; object-fit:cover; margin-right:6px;" />OptraMail
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Home</div>
+      <a href="#" class="nav-item active" data-view="activity">
+        <span class="nav-icon">⏱</span> Latest activity
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Reports</div>
+      <a href="#" class="nav-item" data-view="tracking">
+        <span class="nav-icon">📧</span> Email tracking
+      </a>
+      <a href="#" class="nav-item" data-view="links">
+        <span class="nav-icon">🖱</span> Link clicks
+      </a>
+      <a href="#" class="nav-item" data-view="pdf">
+        <span class="nav-icon">📄</span> PDF analytics
+      </a>
+      <a href="#" class="nav-item" data-view="performance">
+        <span class="nav-icon">📊</span> My performance
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Data Hub</div>
+      <a href="#" class="nav-item" data-view="crm">
+        <span class="nav-icon">👥</span> MyCRM
+      </a>
+      <a href="#" class="nav-item" data-view="files">
+        <span class="nav-icon">📁</span> All files
+      </a>
+    </div>
+
+    <div class="sidebar-section" style="margin-top: auto; margin-bottom: 20px;">
+      <a href="#" class="nav-item" onclick="if(confirm('Sign out of OptraMail?')) { localStorage.removeItem('optramail_email'); localStorage.removeItem('optramail_plan'); window.location.href = 'index.html'; }">
+        <span class="nav-icon" style="color: #ef4444;">🚪</span> <span style="color: #ef4444;">Sign Out</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-wrapper">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" placeholder="Search Contacts" />
+      </div>
+
+      <div class="topbar-right">
+        <button class="btn-upgrade">💎 Upgrade Plan</button>
+        <a href="index.html#pricing" class="top-link">Plans & pricing</a>
+        <div class="topbar-icons">
+          <span>🔔</span>
+          <span>❓</span>
+          <span>⚙️</span>
+        </div>
+        <div class="user-profile" id="user-profile">
+          <div class="avatar" id="avatar-initial">U</div>
+          <div class="badge-free">FREE</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content-area">
+      <h1 class="page-title">Latest activity</h1>
+      
+      <div class="tabs">
+        <div class="tab active" data-tab="all">All</div>
+        <div class="tab" data-tab="opens">Opens</div>
+        <div class="tab" data-tab="insights">Insights</div>
+      </div>
+
+      <div id="empty-state" class="empty-state">
+        No events to show yet.
+      </div>
+
+      <!-- PERFORMANCE STATE -->
+      <div id="performance-state" style="display:none; flex-direction:column; gap:20px; animation:fadeUp 0.3s ease;">
+        <h2 style="font-family:'Syne',sans-serif; color:var(--text); font-size:24px;">📊 My Performance</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px;">
+          <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px;">
+            <div style="color:var(--muted); font-size:13px; font-weight:500; margin-bottom:8px;">Emails Sent</div>
+            <div id="perf-totalSent" style="font-size:28px; font-weight:700; color:var(--text);">-</div>
+          </div>
+          <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px;">
+            <div style="color:var(--muted); font-size:13px; font-weight:500; margin-bottom:8px;">Total Opens</div>
+            <div id="perf-totalOpen" style="font-size:28px; font-weight:700; color:#22c55e;">-</div>
+          </div>
+          <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px;">
+            <div style="color:var(--muted); font-size:13px; font-weight:500; margin-bottom:8px;">Total Clicks</div>
+            <div id="perf-totalClick" style="font-size:28px; font-weight:700; color:#6c63ff;">-</div>
+          </div>
+          <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px;">
+            <div style="color:var(--muted); font-size:13px; font-weight:500; margin-bottom:8px;">Open Rate</div>
+            <div id="perf-openRate" style="font-size:28px; font-weight:700; color:var(--text);">-</div>
+          </div>
+          <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px;">
+            <div style="color:var(--muted); font-size:13px; font-weight:500; margin-bottom:8px;">Click Rate</div>
+            <div id="perf-clickRate" style="font-size:28px; font-weight:700; color:var(--text);">-</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(108,99,255,0.05); border-left:4px solid #6c63ff; border-radius:8px; padding:24px; margin-top:8px;">
+          <div style="font-size:14px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Performance Overview</div>
+          <div style="display:flex; align-items:center; gap:32px;">
+            <div>
+              <div style="font-size:13px; color:var(--muted);">Engagement Score</div>
+              <div id="perf-engagementScore" style="font-size:36px; font-weight:800; color:var(--text);">-</div>
+            </div>
+            <div>
+              <div style="font-size:13px; color:var(--muted);">Status</div>
+              <div id="perf-performanceLevel" style="font-size:36px; font-weight:800; font-family:'Syne',sans-serif; background:linear-gradient(90deg, #6c63ff, #ff6584); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CRM STATE -->
+      <div id="crm-state" style="display:none; flex-direction:column; gap:20px; animation:fadeUp 0.3s ease;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="font-family:'Syne',sans-serif; color:var(--text); font-size:24px;">👥 My CRM</h2>
+          <button id="btn-add-contact" style="background:#6c63ff; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:600; cursor:pointer; font-family:'Inter', sans-serif;">+ Add Contact</button>
+        </div>
+
+        <div id="crm-form-container" style="display:none; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px;">
+          <h3 style="margin-top:0; margin-bottom:12px; font-size:16px; color:var(--text);">New Contact</h3>
+          <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+            <input id="crm-input-name" placeholder="Name" style="flex:1; min-width:150px; padding:10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);" />
+            <input id="crm-input-email" placeholder="Email" type="email" style="flex:1; min-width:150px; padding:10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);" />
+            <input id="crm-input-company" placeholder="Company (optional)" style="flex:1; min-width:150px; padding:10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);" />
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button id="btn-save-contact" style="background:#22c55e; color:#fff; border:none; padding:8px 24px; border-radius:6px; font-weight:600; cursor:pointer;">Save Contact</button>
+            <button id="btn-cancel-contact" style="background:transparent; color:var(--muted); border:none; padding:8px 16px; font-weight:600; cursor:pointer;">Cancel</button>
+          </div>
+        </div>
+
+        <div id="crm-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <div id="data-list" class="data-list">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- ── TIMELINE MODAL ── -->
+  <div id="timeline-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center; opacity:0; transition:opacity 0.2s ease;">
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; padding:24px; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.2); transform:translateY(20px); transition:transform 0.2s ease;" id="timeline-modal-content">
+      <button id="close-timeline" style="position:absolute; top:16px; right:16px; background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer;">&times;</button>
+      <h3 style="margin-bottom:8px; color:var(--text); font-weight:700; font-family:'Syne',sans-serif;">Email Timeline</h3>
+      <p id="timeline-subject" style="font-size:13px; color:var(--muted); margin-bottom:20px;"></p>
+      
+      <div id="timeline-events" style="display:flex; flex-direction:column; gap:16px; position:relative;">
+        <!-- Timeline lines and events will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
