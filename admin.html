@@ -349,11 +349,15 @@
       <div class="login-sub" style="margin-top:4px;">Admin Panel — Restricted Access</div>
     </div>
     <div class="input-group">
-      <label>Admin Secret Key</label>
-      <input type="password" id="secret-input" placeholder="Enter secret key..." onkeydown="if(event.key==='Enter')login()"/>
+      <label>Email Address</label>
+      <input type="email" id="email-input" placeholder="admin@example.com" onkeydown="if(event.key==='Enter')login()"/>
     </div>
-    <button class="login-btn" onclick="login()">Access Admin Panel</button>
-    <div class="login-error" id="login-error">❌ Wrong secret key. Try again.</div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="password-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"/>
+    </div>
+    <button class="login-btn" onclick="login()">Sign In</button>
+    <div class="login-error" id="login-error">❌ Invalid email or password.</div>
   </div>
 </div>
 
@@ -552,49 +556,57 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const SERVER = "https://optramail.vercel.app";
-  let adminSecret = "";
+  const SERVER = "https://optramail-backend.vercel.app";
+  let adminToken = "";
   let allUsers = [];
   let allEmails = [];
 
   document.addEventListener('DOMContentLoaded', () => {
-    const email = localStorage.getItem('optramail_email');
-    if (email === 'sonjoy.bairagee@gmail.com') {
-      document.getElementById("secret-input").value = "OptraMail@Admin2026";
-      login();
+    const savedToken = sessionStorage.getItem('adminToken');
+    if (savedToken) {
+      adminToken = savedToken;
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("app").style.display = "flex";
+      loadAll();
     }
   });
 
   // ── LOGIN ──
-  function login() {
-    const secret = document.getElementById("secret-input").value.trim();
-    if (!secret) return;
+  async function login() {
+    const email = document.getElementById("email-input").value.trim();
+    const password = document.getElementById("password-input").value;
+    if (!email || !password) return;
 
-    adminSecret = secret;
-    // Test the secret by calling a protected endpoint
-    fetch(`${SERVER}/api/admin/stats`, {
-      headers: { "x-admin-secret": secret }
-    })
-    .then(r => {
-      if (r.status === 403) throw new Error("wrong");
-      return r.json();
-    })
-    .then(() => {
+    try {
+      const res = await fetch(`${SERVER}/api/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error);
+
+      adminToken = data.token;
+      sessionStorage.setItem('adminToken', adminToken);
+      
       document.getElementById("login-screen").style.display = "none";
       document.getElementById("app").style.display = "flex";
       loadAll();
-    })
-    .catch(() => {
+    } catch (err) {
       document.getElementById("login-error").style.display = "block";
-      adminSecret = "";
-    });
+      document.getElementById("login-error").textContent = "❌ " + (err.message || "Invalid credentials");
+      adminToken = "";
+    }
   }
 
   function logout() {
-    adminSecret = "";
+    adminToken = "";
+    sessionStorage.removeItem('adminToken');
     document.getElementById("login-screen").style.display = "flex";
     document.getElementById("app").style.display = "none";
-    document.getElementById("secret-input").value = "";
+    document.getElementById("email-input").value = "";
+    document.getElementById("password-input").value = "";
   }
 
   // ── NAVIGATION ──
@@ -635,7 +647,7 @@
   // ── STATS ──
   async function loadStats() {
     try {
-      const r = await fetch(`${SERVER}/api/admin/stats`, { headers: { "x-admin-secret": adminSecret } });
+      const r = await fetch(`${SERVER}/api/admin/stats`, { headers: { "Authorization": `Bearer ${adminToken}` } });
       const data = await r.json();
       document.getElementById("stat-total").textContent = data.totalUsers ?? "—";
       document.getElementById("stat-pro").textContent = data.proUsers ?? "—";
@@ -649,7 +661,7 @@
   // ── USERS ──
   async function loadUsers() {
     try {
-      const r = await fetch(`${SERVER}/api/admin/users`, { headers: { "x-admin-secret": adminSecret } });
+      const r = await fetch(`${SERVER}/api/admin/users`, { headers: { "Authorization": `Bearer ${adminToken}` } });
       const data = await r.json();
       allUsers = data.users || [];
       renderUsers(allUsers);
@@ -714,7 +726,7 @@
   // ── EMAILS ──
   async function loadEmails() {
     try {
-      const r = await fetch(`${SERVER}/api/admin/emails`, { headers: { "x-admin-secret": adminSecret } });
+      const r = await fetch(`${SERVER}/api/admin/emails`, { headers: { "Authorization": `Bearer ${adminToken}` } });
       const data = await r.json();
       allEmails = data.emails || [];
       renderEmails(allEmails);
@@ -762,7 +774,7 @@
     try {
       const r = await fetch(`${SERVER}/api/admin/set-pro`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-secret": adminSecret },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${adminToken}` },
         body: JSON.stringify({ email, isPro: grant })
       });
       const data = await r.json();
