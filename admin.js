@@ -19,7 +19,7 @@ function login() {
   if (!secret) return;
   adminSecret = secret;
 
-  fetch(`/api/admin?action=stats`, {
+  fetch(`${SERVER}/api/admin?action=stats`, {
     headers: { "x-admin-secret": secret }
   })
   .then(r => { if (r.status === 403) throw new Error("wrong"); return r.json(); })
@@ -59,7 +59,7 @@ function refreshAll() { loadAll(); showToast("Refreshed!", "success"); }
 
 async function checkServerStatus() {
   try {
-    const r = await fetch(`/api/health`);
+    const r = await fetch(`${SERVER}/health`);
     const dot = document.getElementById("status-dot");
     const txt = document.getElementById("status-text");
     if (r.ok) { dot.classList.remove("red"); txt.textContent = "Server online"; }
@@ -72,7 +72,7 @@ async function checkServerStatus() {
 
 async function loadStats() {
   try {
-    const r = await fetch(`/api/admin?action=stats`, { headers: { "x-admin-secret": adminSecret } });
+    const r = await fetch(`${SERVER}/api/admin?action=stats`, { headers: { "x-admin-secret": adminSecret } });
     const data = await r.json();
     document.getElementById("stat-total").textContent = data.totalUsers ?? "0";
     document.getElementById("stat-pro").textContent = data.proUsers ?? "0";
@@ -85,7 +85,7 @@ async function loadStats() {
 
 async function loadUsers() {
   try {
-    const r = await fetch(`/api/admin?action=users`, { headers: { "x-admin-secret": adminSecret } });
+    const r = await fetch(`${SERVER}/api/admin?action=users`, { headers: { "x-admin-secret": adminSecret } });
     const data = await r.json();
     allUsers = data.users || [];
     renderUsers(allUsers);
@@ -96,7 +96,7 @@ async function loadUsers() {
 
 async function loadEmails() {
   try {
-    const r = await fetch(`/api/admin?action=emails`, { headers: { "x-admin-secret": adminSecret } });
+    const r = await fetch(`${SERVER}/api/admin?action=emails`, { headers: { "x-admin-secret": adminSecret } });
     const data = await r.json();
     allEmails = data.emails || [];
     renderEmails(allEmails);
@@ -187,7 +187,7 @@ async function quickRevoke(email) { await callGrantRevoke(email, false); }
 
 async function callGrantRevoke(email, grant) {
   try {
-    const r = await fetch(`/api/admin?action=set-pro`, {
+    const r = await fetch(`${SERVER}/api/admin?action=set-pro`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-admin-secret": adminSecret },
       body: JSON.stringify({ email, isPro: grant })
