@@ -89,6 +89,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // ── SIDEBAR NAVIGATION ──
+  const navItems = document.querySelectorAll('.nav-item[data-view]');
+  const pageTitle = document.querySelector('.page-title');
+  const tabsContainer = document.querySelector('.tabs');
+  const performanceState = document.getElementById('performance-state');
+  const crmState = document.getElementById('crm-state');
+  const comingSoonState = document.getElementById('coming-soon-state');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      // Update active state
+      navItems.forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
+      
+      // Update title (remove emojis)
+      pageTitle.textContent = item.textContent.replace(/[^\x20-\x7E]/g, '').trim();
+      
+      // Hide all views
+      tabsContainer.style.display = 'none';
+      document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('data-list').style.display = 'none';
+      if (performanceState) performanceState.style.display = 'none';
+      if (crmState) crmState.style.display = 'none';
+      if (comingSoonState) comingSoonState.style.display = 'none';
+      
+      const view = item.getAttribute('data-view');
+      
+      if (view === 'activity' || view === 'tracking') {
+        tabsContainer.style.display = 'flex';
+        // Re-render data to show either empty state or list
+        if (email) loadTrackedEmails(email);
+        else renderData([]);
+      } else if (view === 'performance') {
+        if (performanceState) performanceState.style.display = 'flex';
+      } else if (view === 'crm') {
+        if (crmState) crmState.style.display = 'flex';
+      } else {
+        if (comingSoonState) comingSoonState.style.display = 'block';
+      }
+    });
+  });
+
   // ── UPGRADE BUTTON ──
   const upgradeBtn = document.querySelector('.btn-upgrade');
   if (upgradeBtn) {
