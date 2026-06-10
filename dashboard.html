@@ -378,7 +378,7 @@
     </div>
 
     <div class="sidebar-section" style="margin-top: auto; margin-bottom: 20px;">
-      <a href="#" class="nav-item" onclick="if(confirm('Sign out of OptraMail?')) { localStorage.removeItem('optramail_email'); localStorage.removeItem('optramail_plan'); window.location.href = 'index.html'; }">
+      <a href="#" class="nav-item" onclick="showSignoutModal(); return false;">
         <span class="nav-icon" style="color: #ef4444;">🚪</span> <span style="color: #ef4444;">Sign Out</span>
       </a>
     </div>
